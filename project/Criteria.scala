@@ -4,7 +4,7 @@ import sbt.Keys._
 
 object BuildSettings
 {
-	val buildVersion = "0.10.0"
+	val buildVersion = "0.80.0"
 
 	val filter = { (ms: Seq[(File, String)]) =>
 	ms filter {
@@ -16,8 +16,8 @@ object BuildSettings
 	val buildSettings = Defaults.defaultSettings ++ Seq(
 		organization := "org.reactivemongo",
 		version := buildVersion,
-		scalaVersion := "2.10.2",
-		crossScalaVersions := Seq("2.10.2"),
+		scalaVersion := "2.10.6",
+		crossScalaVersions := Seq("2.10.6"),
 		crossVersion := CrossVersion.binary,
 		javaOptions in test ++= Seq("-Xmx512m", "-XX:MaxPermSize=512m"),
 		scalacOptions ++= Seq("-unchecked", "-deprecation"),

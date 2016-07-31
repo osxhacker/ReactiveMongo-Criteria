@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package reactivemongo.criteria.dsl
+package reactivemongo.extensions.dsl.criteria
 
 import scala.language.{
 	dynamics,
@@ -45,7 +45,7 @@ import reactivemongo.bson._
  *	 BSONArray (
  *		 BSONDocument (
  *			 "first" -> BSONDocument ("$lt" -> BSONInteger (10))
- *	 		),
+ *			),
  *		BSONDocument (
  *			"$or" ->
  *			BSONArray (
@@ -67,11 +67,10 @@ import reactivemongo.bson._
  * @author svickers
  *
  */
-case class Expression (name : Option[String], element : BSONElement)
+final case class Expression (name : Option[String], element : BSONElement)
 {
 	/// Class Imports
 	import Expression._
-
 
 	/**
 	 * The logical negation operator attempts to invert this '''Expression'''
@@ -80,56 +79,55 @@ case class Expression (name : Option[String], element : BSONElement)
 	 */
 	def unary_! : Expression =
 		this match {
-			case Expression (Some (term), ("$in", vals)) =>
-				Expression (term, ("$nin", vals));
-
-			case Expression (Some (term), ("$nin", vals)) =>
-				Expression (term, ("$in", vals));
-
-			case Expression (Some (term), ("$ne", vals)) =>
-				Expression (term, (term, vals));
-
-			case Expression (Some (term), (field, vals)) if (field == term) =>
-				Expression (term, ("$ne", vals));
-
-			case Expression (None, ("$nor", vals)) =>
-				Expression (None, ("$or" -> vals));
-
-			case Expression (None, ("$or", vals)) =>
-				Expression (None, ("$nor" -> vals));
-
+			case Expression (Some (term),  ("$in", vals)) =>
+				Expression (term,  ("$nin", vals));
+				
+			case Expression (Some (term),  ("$nin", vals)) =>
+				Expression (term,  ("$in", vals));
+				
+			case Expression (Some (term),  ("$ne", vals)) =>
+				Expression (term,  (term, vals));
+				
+			case Expression (Some (term),  (field, vals)) if  (field == term) =>
+				Expression (term,  ("$ne", vals));
+				
+			case Expression (None,	("$nor", vals)) =>
+				Expression (None,  ("$or" -> vals));
+				
+			case Expression (None,	("$or", vals)) =>
+				Expression (None,  ("$nor" -> vals));
+				
 			case Expression (Some ("$not"), el) =>
 				Expression (None, el);
-
+				
 			case Expression (Some (n), _) =>
-				Expression (Some ("$not"), (n -> BSONDocument (element)));
-
+				Expression (Some ("$not"),	(n -> BSONDocument (element)));
+				
 			case Expression (None, el) =>
 				Expression (Some ("$not"), el);
-			}
+		}
 
 
 	/**
-	 * Conjunction: ''AND''.
-	 */
+	* Conjunction: ''AND''.
+	*/
 	def && (rhs : Expression) : Expression = combine ("$and", rhs);
 
-
 	/**
-	 * Negation of conjunction: ''NOR''.
-	 */
+	* Negation of conjunction: ''NOR''.
+	*/
 	def !&& (rhs : Expression) : Expression = combine ("$nor", rhs);
 
 
 	/**
-	 * Disjunction: ''OR''.
-	 */
+	* Disjunction: ''OR''.
+	*/
 	def || (rhs : Expression) : Expression = combine ("$or", rhs);
 
 
 	/**
-	 * The isEmpty method reports as to whether or not this '''Expression'''
-	 * has neither a `name` nor an assigned value.
+	* The isEmpty method reports as to whether or not this '''Expression'''
+	* has neither a `name` nor an assigned value.
 	*/
 	def isEmpty : Boolean = name.isEmpty && element._1.isEmpty;
 
@@ -140,21 +138,21 @@ case class Expression (name : Option[String], element : BSONElement)
 		else
 			element match {
 				case (`op`, arr : BSONArray) =>
-				  Expression (
-					  None,
-					  (op, arr ++ BSONArray (toBSONDocument (rhs)))
-				  	);
-
-				case ("", _) =>
-				  rhs;
-
+					Expression (
+						None,
+						 (op, arr ++ BSONArray (toBSONDocument (rhs)))
+						);
+					
+				case ("", _) => rhs;
+				
 				case _ =>
-				  Expression (
-					None,
-					(
-						op -> BSONArray (toBSONDocument (this),
-						toBSONDocument (rhs))
-					));
+					Expression (
+						None,
+						op -> BSONArray (
+							toBSONDocument (this),
+							toBSONDocument (rhs)
+							)
+						);
 				}
 }
 
@@ -162,16 +160,16 @@ case class Expression (name : Option[String], element : BSONElement)
 object Expression
 {
 	/**
-	 * The empty property is provided so that ''monoid'' definitions for '''Expression''' can
-	 * be easily provided.
-	 */
+	* The empty property is provided so that ''monoid'' definitions for
+	* '''Expression''' can be easily provided.
+	*/
 	val empty = new Expression (None, "" -> BSONDocument.empty);
 
 
 	/**
-	 * The apply method provides functional-style creation syntax for
-	 * [[reactivemongo.dsl.Expression]] instances.
-	 */
+	* The apply method provides functional-style creation syntax for
+	* [[reactivemongo.extensions.dsl.criteria.Expression]] instances.
+	*/
 	def apply (name : String, element : BSONElement) : Expression =
 		new Expression (Some (name), element);
 
@@ -188,15 +186,13 @@ object Expression
 		expr match {
 			case Expression (Some (name), (field, element)) if (name == field) =>
 				BSONDocument (field -> element);
-
+				
 			case Expression (Some (name), element) =>
 				BSONDocument (name -> BSONDocument (element));
-
-			case Expression (None, ("", _)) =>
-				BSONDocument.empty;
-
-			case Expression (None, element) =>
-				BSONDocument (element);
+				
+			case Expression (None,  ("", _)) => BSONDocument.empty;
+			
+			case Expression (None, element) => BSONDocument (element);
 			}
 
 
