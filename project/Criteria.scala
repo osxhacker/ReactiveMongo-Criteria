@@ -4,7 +4,7 @@ import sbt.Keys._
 
 object BuildSettings
 {
-	val buildVersion = "0.80.0"
+	val buildVersion = "0.11.14"
 
 	val filter = { (ms: Seq[(File, String)]) =>
 	ms filter {
@@ -71,13 +71,13 @@ object Resolvers
 
 object Dependencies
 {
-	val rmongoVersion = "0.10.0"
+	val rmongoVersion = "0.11.14"
 
 	val bson = "org.reactivemongo" %% "reactivemongo-bson" % rmongoVersion
 
 	val bsonmacros = "org.reactivemongo" %% "reactivemongo-bson-macros" % rmongoVersion
 
-	val specs = "org.specs2" %% "specs2" % "2.2.1" % "test"
+    val scalaTest = "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 }
 
 object ReactiveMongoCriteriaBuild extends Build
@@ -92,7 +92,9 @@ object ReactiveMongoCriteriaBuild extends Build
 		settings = buildSettings ++ Seq(
 			resolvers := resolversList,
 			libraryDependencies <++= (scalaVersion)(sv => Seq(
-				specs, bson, bsonmacros)
+				scalaTest, bson, bsonmacros,
+                "org.scala-lang" % "scala-reflect" % sv
+                )
 			)
 		)
 	)

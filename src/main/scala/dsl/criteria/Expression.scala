@@ -113,6 +113,7 @@ final case class Expression (name : Option[String], element : BSONElement)
 	*/
 	def && (rhs : Expression) : Expression = combine ("$and", rhs);
 
+
 	/**
 	* Negation of conjunction: ''NOR''.
 	*/

@@ -306,7 +306,7 @@ class UntypedCriteriaSpec
 				BSONDocument (
 					"$not" -> BSONDocument (
 						"a" -> BSONDocument (
-							"$regex" -> BSONRegex ("regex (p)?", "")
+							"$regex" -> BSONRegex ("regex(p)?", "")
 							)
 						)
 					)

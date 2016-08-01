@@ -35,8 +35,8 @@ class UntypedWhereSpec
 	extends FlatSpec
 	with Matchers
 {
-  /// Class Imports
-  import Untyped._
+	/// Class Imports
+	import Untyped._
 
 
 	"An Untyped where" should "support 1 placeholder" in
