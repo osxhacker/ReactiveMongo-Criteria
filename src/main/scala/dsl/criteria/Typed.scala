@@ -19,8 +19,6 @@ package reactivemongo.extensions.dsl.criteria
 
 import scala.language.dynamics
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
-import scala.reflect.runtime.universe._
 
 
 /**
@@ -34,57 +32,34 @@ import scala.reflect.runtime.universe._
 object Typed
 {
 	/// Class Types
-	class PropertyAccess[T] extends Dynamic
+	/**
+	 * The '''PropertyAccess''' type exists for syntactic convenience when
+	 * the `criteria` method is used.  The tandem allow for constructs such
+	 * as:
+	 *
+	 * {{{
+	 * import Typed._
+	 *
+	 * val typeCheckedQuery = criteria[SomeType] (_.first) < 10 && (
+	 *    criteria[SomeType] (_.second) >= 20.0 ||
+	 *    criteria[SomeType] (_.second).in (0.0, 1.0)
+	 *    );
+	 * }}}
+	 *
+	 * @author svickers
+	 *
+	 */
+	final class PropertyAccess[ParentT <: AnyRef]
 	{
-		def selectDynamic (property : String) = macro PropertyAccess.select[T]
-	}
-
-
-	object PropertyAccess
-	{
-		def select[T : c.WeakTypeTag] (c : Context)
-			(property : c.Expr[String]) =
-		{
-			import c.universe._
-			import c.universe.typeOf
-			import c.mirror._
-
-			val tree = (c.prefix.tree, property.tree) match {
-				case (
-					TypeApply (Select (_, _), List (parentType)),
-					st @ Literal (Constant (name : String))
-					) =>
-					val accessor = parentType.tpe.member (newTermName (name)) orElse {
-						c.abort (
-							c.enclosingPosition,
-							s"$name is not a member of ${parentType.tpe}"
-							);
-						}
-
-					Apply (
-						Select (
-							New (TypeTree (typeOf[Term[Any]])),
-							nme.CONSTRUCTOR
-							),
-						List (st)
-						);
-
-				case other =>
-					c.abort (
-						c.enclosingPosition,
-						s"only property access is supported: $other"
-						);
-				}
-
-			c.Expr[Any](tree);
-		}
+		def apply[T] (statement : ParentT => T) : Term[T] =
+			macro TypedMacros.createTerm[ParentT, T];
 	}
 
 
 	/**
-	* The criteria method produces a type which enforces the existence of
-	* property names within ''T''.
-	*/
-	def criteria[T] = new PropertyAccess[T];
+	 * The criteria method produces a type which enforces the existence of
+	 * property names within ''T''.
+	 */
+	def criteria[T <: AnyRef] : PropertyAccess[T] = new PropertyAccess[T];
 }
 

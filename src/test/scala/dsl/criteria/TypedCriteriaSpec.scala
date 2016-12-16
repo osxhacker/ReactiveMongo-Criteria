@@ -37,7 +37,14 @@ class TypedCriteriaSpec
 	with Matchers
 {
 	/// Class Types
-	case class Nested (description : String)
+	case class Grandchild (saying : String)
+
+	case class Nested (
+		description : String,
+		score : Double,
+		grandchild : Grandchild
+		)
+
 	case class ExampleDocument (age : Int, name : String, nested : Nested)
 
 
@@ -47,32 +54,222 @@ class TypedCriteriaSpec
 
 	"A Typed criteria" should "support equality comparisons" in
 	{
+		/// Since a Typed.criteria is being used, the compiler will enforce
+		/// the leaf property types given to the criteria method.
 		BSONDocument.pretty (
-			criteria[ExampleDocument].name === "a value"
+			criteria[ExampleDocument] (_.name) =/= "a value"
 			) shouldBe (
 			BSONDocument.pretty (
-				BSONDocument ("name" -> BSONString ("a value"))
+				BSONDocument (
+					"name" -> BSONDocument ("$ne" -> BSONString ("a value"))
+					)
 				)
 			);
 
 		BSONDocument.pretty (
-			criteria[ExampleDocument].name @== "another value"
+			criteria[ExampleDocument] (_.age) @== 99
 			) shouldBe (
 			BSONDocument.pretty (
-				BSONDocument ("name" -> BSONString ("another value"))
+				BSONDocument ("age" -> BSONInteger (99))
 				)
 			);
 	}
 
-    /// TODO: enforce the nested type referenced in the selector
-	ignore should "support nested object selectors" in
+	it should "support nested object selectors" in
 	{
-		val q = criteria[ExampleDocument].nested.description =/= "something";
+		/// Since a Typed.criteria is being used, the compiler will enforce
+		/// both the validity of the selector path as well as the ultimate
+		/// type referenced (a String in this case).
+		val q = criteria[ExampleDocument] (_.nested.grandchild.saying) =/=
+			"something";
 
 		BSONDocument.pretty (q) shouldBe (
 			BSONDocument.pretty (
 				BSONDocument (
-					"nested.description" -> BSONDocument ("$ne" -> "something")
+					"nested.grandchild.saying" ->
+					BSONDocument ("$ne" -> "something")
+					)
+				)
+			);
+	}
+
+	it should "support ordering comparisons" in
+	{
+		/// Since a Typed.criteria is being used, the compiler will enforce
+		/// the leaf property types given to the criteria method.
+		BSONDocument.pretty (
+			criteria[ExampleDocument] (_.nested.score) >= 2.3
+			) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"nested.score" ->
+					BSONDocument ("$gte" -> BSONDouble (2.3))
+					)
+				)
+			);
+
+		BSONDocument.pretty (
+			criteria[ExampleDocument] (_.age) < 99
+			) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument ("age" ->
+					BSONDocument ("$lt" -> BSONInteger (99))
+					)
+				)
+			);
+	}
+
+	it should "support String operations" in
+	{
+		val q = criteria[ExampleDocument] (_.name) =~ "^test|re";
+
+		BSONDocument.pretty (q) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"name" -> BSONDocument (
+						"$regex" -> BSONRegex ("^test|re", "")
+						)
+					)
+				)
+			);
+	}
+
+	it should "support conjunctions" in
+	{
+		val q = criteria[ExampleDocument] (_.age) < 90 &&
+			criteria[ExampleDocument] (_.nested.score) >= 20.0;
+
+		BSONDocument.pretty (BSONDocument (q.element)) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"$and" -> BSONArray (
+						BSONDocument (
+							"age" -> BSONDocument (
+								"$lt" -> BSONInteger (90)
+								)
+							),
+						BSONDocument (
+							"nested.score" -> BSONDocument (
+								"$gte" -> BSONDouble (20.0)
+								)
+							)
+						)
+					)
+				)
+			);
+	}
+
+	it should "support disjunctions" in
+	{
+		val q = criteria[ExampleDocument] (_.age) < 90 ||
+			criteria[ExampleDocument] (_.nested.score) >= 20.0;
+
+		BSONDocument.pretty (BSONDocument (q.element)) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"$or" -> BSONArray (
+						BSONDocument (
+							"age" -> BSONDocument ("$lt" -> BSONInteger (90))
+							),
+						BSONDocument (
+							"nested.score" -> BSONDocument (
+								"$gte" -> BSONDouble(20.0)
+								)
+							)
+						)
+					)
+				)
+			);
+	}
+
+	it should "combine adjacent conjunctions" in
+	{
+		val q = criteria[ExampleDocument] (_.age) < 90 &&
+			criteria[ExampleDocument] (_.nested.score) >= 0.0 &&
+			criteria[ExampleDocument] (_.nested.score) < 20.0;
+
+		BSONDocument.pretty (BSONDocument (q.element)) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"$and" -> BSONArray (
+						BSONDocument (
+							"age" -> BSONDocument ("$lt" -> BSONInteger (90))
+							),
+						BSONDocument (
+							"nested.score" -> BSONDocument (
+								"$gte" -> BSONDouble(0.0)
+								)
+							),
+						BSONDocument (
+							"nested.score" ->
+							BSONDocument ("$lt" -> BSONDouble (20.0))
+							)
+						)
+					)
+				)
+			);
+	}
+
+	it should "combine adjacent disjunctions" in
+	{
+		val q = criteria[ExampleDocument] (_.age) < 90 ||
+			criteria[ExampleDocument] (_.nested.score) >= 0.0 ||
+			criteria[ExampleDocument] (_.nested.score) < 20.0;
+
+		BSONDocument.pretty (BSONDocument (q.element)) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"$or" -> BSONArray (
+						BSONDocument (
+							"age" -> BSONDocument ("$lt" -> BSONInteger (90))
+							),
+						BSONDocument (
+							"nested.score" -> BSONDocument (
+								"$gte" -> BSONDouble(0.0)
+								)
+							),
+						BSONDocument (
+							"nested.score" ->
+							BSONDocument ("$lt" -> BSONDouble (20.0))
+							)
+						)
+					)
+				)
+			);
+	}
+
+	it should "support compound filtering" in
+	{
+		val q = criteria[ExampleDocument] (_.age) < 90 && (
+			criteria[ExampleDocument] (_.nested.score) >= 20.0 ||
+			criteria[ExampleDocument] (_.nested.score).in (0.0, 1.0)
+			);
+
+		BSONDocument.pretty (q) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"$and" -> BSONArray (
+						BSONDocument (
+							"age" -> BSONDocument ("$lt" -> BSONInteger (90))
+							),
+						BSONDocument (
+							"$or" -> BSONArray (
+								BSONDocument (
+									"nested.score" -> BSONDocument (
+										"$gte" -> BSONDouble(20.0)
+										)
+									),
+								BSONDocument (
+									"nested.score" -> BSONDocument (
+										"$in" -> BSONArray (
+											BSONDouble (0.0),
+											BSONDouble (1.0)
+											)
+										)
+									)
+								)
+							)
+						)
 					)
 				)
 			);

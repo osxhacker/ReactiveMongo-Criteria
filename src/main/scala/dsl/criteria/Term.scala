@@ -28,7 +28,7 @@ import reactivemongo.bson._
  * @author svickers
  *
  */
-final case class Term[T](`_term$name`: String)
+final case class Term[T] (`_term$name`: String)
     extends Dynamic
 {
 	/**
@@ -124,7 +124,8 @@ final case class Term[T](`_term$name`: String)
 
 
 	/**
-	* Field value equals either '''head''' or one of the (optional) '''tail''' values: '''$in'''.
+	* Field value equals either '''head''' or one of the (optional)
+	* '''tail''' values: '''$in'''.
 	*/
 	def in[U <: T : ValueBuilder] (head : U, tail : U*)
 		(implicit B : ValueBuilder[U])

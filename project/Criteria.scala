@@ -4,7 +4,7 @@ import sbt.Keys._
 
 object BuildSettings
 {
-	val buildVersion = "0.11.14"
+	val buildVersion = Dependencies.reactiveMongoVersion
 
 	val filter = { (ms: Seq[(File, String)]) =>
 	ms filter {
@@ -16,14 +16,20 @@ object BuildSettings
 	val buildSettings = Defaults.defaultSettings ++ Seq(
 		organization := "org.reactivemongo",
 		version := buildVersion,
-		scalaVersion := "2.10.6",
-		crossScalaVersions := Seq("2.10.6"),
-		crossVersion := CrossVersion.binary,
+		scalaVersion := "2.11.8",
 		javaOptions in test ++= Seq("-Xmx512m", "-XX:MaxPermSize=512m"),
 		scalacOptions ++= Seq("-unchecked", "-deprecation"),
-		scalacOptions in (Compile, doc) ++= Seq("-unchecked", "-deprecation", "-diagrams", "-implicits"),
-		scalacOptions in (Compile, doc) ++= Opts.doc.title("ReactiveMongo Criteria"),
-		scalacOptions in (Compile, doc) ++= Opts.doc.version(buildVersion),
+		scalacOptions in (Compile, doc) ++= Seq (
+			"-unchecked",
+			"-deprecation",
+			"-diagrams",
+			"-implicits",
+			"-feature"
+			),
+		scalacOptions in (Compile, doc) ++= Opts.doc.title (
+			"ReactiveMongo Criteria"
+			),
+		scalacOptions in (Compile, doc) ++= Opts.doc.version (buildVersion),
 		mappings in (Compile, packageBin) ~= filter,
 		mappings in (Compile, packageSrc) ~= filter,
 		mappings in (Compile, packageDoc) ~= filter) ++ Publish.settings
@@ -56,7 +62,7 @@ object Publish
 			<developer>
 				<id>osxhacker</id>
 				<name>Steve Vickers</name>
-				<url>http://www.iteamsolutions.com</url>
+				<url>https://github.com/osxhacker</url>
 			</developer>
 		</developers>))
 }
@@ -71,11 +77,11 @@ object Resolvers
 
 object Dependencies
 {
-	val rmongoVersion = "0.11.14"
+	val reactiveMongoVersion = "0.12.0"
 
-	val bson = "org.reactivemongo" %% "reactivemongo-bson" % rmongoVersion
+	val bson = "org.reactivemongo" %% "reactivemongo-bson" % reactiveMongoVersion
 
-	val bsonmacros = "org.reactivemongo" %% "reactivemongo-bson-macros" % rmongoVersion
+	val bsonmacros = "org.reactivemongo" %% "reactivemongo-bson-macros" % reactiveMongoVersion
 
     val scalaTest = "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 }
