@@ -49,9 +49,8 @@ object TypedMacros
 		val q"""(..$args) => $select""" = statement;
 
 		val selectors = select.collect {
-			case Ident (TermName (property)) => property;
 			case Select (_, TermName (property)) => property;
-			}.reverse.drop (1).mkString (".");
+			}.reverse.mkString (".");
 
 		val propertyType = weakTypeOf[U];
 
