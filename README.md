@@ -183,16 +183,18 @@ criteria.strings.all ("hello", "world")
 
 ### String Operators
 
-* **=~** Matches a string property which satisfies the given regular expression `String`.
+* **=~** Matches a string property which satisfies the given regular expression `String`, optionally with [regex flags](https://docs.mongodb.com/manual/reference/operator/query/regex/).
 
 ```scala
 criteria.aProperty =~ """^(value)|(someting\s+else)"""
+criteria.aProperty =~ """^(value)|(someting\s+else)""" -> IgnoreCase
 ```
 
-* **!~** Matches a string property which does _not_ satisfy the given regular expression `String`.
+* **!~** Matches a string property which does _not_ satisfy the given regular expression `String`, optionally with [regex flags](https://docs.mongodb.com/manual/reference/operator/query/regex/).
 
 ```scala
 criteria.aProperty !~ """\d+"""
+criteria.aProperty !~ """foo.*bar""" -> (IgnoreCase | MultilineMatching)
 ```
 
 ### Logical Operators

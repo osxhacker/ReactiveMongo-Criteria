@@ -111,6 +111,21 @@ class UntypedCriteriaSpec
 			);
 	}
 
+	it should "support String operations with flags" in
+	{
+		val q = criteria.str =~ "^test|re" -> (MultilineMatching | IgnoreCase);
+		
+		BSONDocument.pretty (q) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"str" -> BSONDocument (
+						"$regex" -> BSONRegex ("^test|re", "mi")
+						)
+					)
+				)
+			);
+	}
+
 	it should "support conjunctions" in
 	{
 		val q = criteria.first < 10 && criteria.second >= 20.0;

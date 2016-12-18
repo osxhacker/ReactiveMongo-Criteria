@@ -168,9 +168,21 @@ object Term
 	implicit class StringTermOps[T >: String](val term : Term[T])
 		extends AnyVal
 	{
+		def =~ (re : (String, RegexModifier)) : Expression = Expression (
+			term.`_term$name`,
+			"$regex" -> BSONRegex (re._1, re._2.value)
+			);
+
+
 		def =~ (re : String) : Expression = Expression (
 			term.`_term$name`,
 			"$regex" -> BSONRegex (re, "")
+			);
+
+
+		def !~ (re : (String, RegexModifier)) : Expression = Expression (
+			term.`_term$name`,
+			"$not" -> BSONDocument ("$regex" -> BSONRegex (re._1, re._2.value))
 			);
 
 
@@ -179,5 +191,75 @@ object Term
 			"$not" -> BSONDocument ("$regex" -> BSONRegex (re, ""))
 			);
 	}
+}
+
+
+/**
+ * '''RegexModifier''' types provide the ability for developers to specify
+ * `$regex` modifiers using type-checked Scala types.  For example, specifying
+ * a `$regex` which ignores case for the `surname` property can be written as:
+ *
+ * {{{
+ *
+ * criteria.surname =~ "smith" -> IgnoreCase;
+ *
+ * }}}
+ *
+ * Multiple modifiers can be combined using the or (`|`) operator, 
+ * producing an implementation-defined ordering.
+ *
+ * @author svickers
+ *
+ */
+sealed trait RegexModifier
+{
+	/**
+	 * Use the or operator to combine two or more '''RegexModifier'''s into
+	 * one logical value.
+	 */
+	def | (other : RegexModifier) : RegexModifier =
+		CombinedRegexModifier (this, other);
+
+
+	def value () : String;
+}
+
+
+case class CombinedRegexModifier (
+	lhs : RegexModifier,
+	rhs : RegexModifier
+	)
+	extends RegexModifier
+{
+	override def value () : String = lhs.value + rhs.value;
+}
+
+
+case object DotMatchesEverything
+	extends RegexModifier
+{
+	override val value : String = "s";
+}
+
+
+
+case object ExtendedExpressions
+	extends RegexModifier
+{
+	override val value : String = "x";
+}
+
+
+case object IgnoreCase
+	extends RegexModifier
+{
+	override val value : String = "i";
+}
+
+
+case object MultilineMatching
+	extends RegexModifier
+{
+	override val value : String = "m";
 }
 

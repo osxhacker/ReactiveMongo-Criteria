@@ -134,6 +134,21 @@ class TypedCriteriaSpec
 			);
 	}
 
+	it should "support String operations with flags" in
+	{
+		val q = criteria[ExampleDocument] (_.name) =~ "^test|re" -> IgnoreCase;
+
+		BSONDocument.pretty (q) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"name" -> BSONDocument (
+						"$regex" -> BSONRegex ("^test|re", "i")
+						)
+					)
+				)
+			);
+	}
+
 	it should "support conjunctions" in
 	{
 		val q = criteria[ExampleDocument] (_.age) < 90 &&
