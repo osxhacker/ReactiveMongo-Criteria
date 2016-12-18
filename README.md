@@ -62,7 +62,8 @@ For situations where the MongoDB document structure is well known and a develope
 ```scala
   {
   // Using a Typed criteria which restricts properties to those
-  // within a given type or direct descendents.
+  // within a given type and/or those directly accessible
+  // through property selectors.
   import Typed._
 
   case class Nested (rating : Double)
@@ -70,7 +71,7 @@ For situations where the MongoDB document structure is well known and a develope
 
   val byKnownProperties = criteria[ExampleDocument] (_.aProperty) =~ "^[A-Z]\\w+" && (
     criteria[ExampleDocument] (_.another) > 0 ||
-    criteria[ExampleDocument] (_.nested.rating) < 10.0 ||
+    criteria[ExampleDocument] (_.nested.rating) < 10.0
 	);
 
   val cursor = collection.find(byKnownProperties).cursor[BSONDocument];
@@ -84,9 +85,9 @@ An easy way to think of this is that if it doesn't compile in "regular usage", t
 
 ### Usage Considerations
 
-Note that `Typed` and `Untyped` serve different needs.  When the structure of a document collection is both known ''and'' identified as static, `Typed` makes sense to employ.  However, `Untyped` is compelling when document structure can vary within a collection.  These are considerations which can easily vary between projects and even within different modules of one project.
+Note that `Typed` and `Untyped` serve different needs.  When the structure of a document collection is both known *and* identified as static, `Typed` makes sense to employ.  However, `Untyped` is compelling when document structure can vary within a collection.  These are considerations which can easily vary between projects and even within different modules of one project.
 
-Feel free to use either or both `Typed` and `Untyped` as they make sense for the problem at hand.  One thing to keep in mind is that the syntax shown above assumes only one is in scope.
+Feel free to use either or both `Typed` and `Untyped` as they make sense for the problem at hand.  One thing to keep in mind is that the examples shown above assumes only one is in scope.
 
 
 ### Roadmap
