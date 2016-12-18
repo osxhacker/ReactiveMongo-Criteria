@@ -1,6 +1,13 @@
 import sbt._
 import sbt.Keys._
 
+import com.typesafe.sbt.osgi.{
+	OsgiKeys,
+	SbtOsgi
+	}
+
+import SbtOsgi.autoImport._
+
 
 object BuildSettings
 {
@@ -95,8 +102,11 @@ object ReactiveMongoCriteriaBuild extends Build
 	lazy val dsl = Project(
 		"ReactiveMongo-Criteria-DSL",
         file("."),
-		settings = buildSettings ++ Seq(
+		settings = buildSettings ++ osgiSettings ++ Seq(
 			resolvers := resolversList,
+			OsgiKeys.exportPackage := Seq(
+				"reactivemongo.extensions.dsl.criteria"
+				),
 			libraryDependencies <++= (scalaVersion)(sv => Seq(
 				scalaTest, bson, bsonmacros,
                 "org.scala-lang" % "scala-reflect" % sv
@@ -104,5 +114,6 @@ object ReactiveMongoCriteriaBuild extends Build
 			)
 		)
 	)
+	.enablePlugins (SbtOsgi);
 }
 

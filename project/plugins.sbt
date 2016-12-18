@@ -6,3 +6,5 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.0")
 
 addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "5.0.1")
 
+addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.1")
+
