@@ -149,6 +149,48 @@ class TypedCriteriaSpec
 			);
 	}
 
+	it should "support multi-value equality" in
+	{
+		BSONDocument.pretty (
+			criteria[ExampleDocument] (_.age).in (21 to 25)
+			) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"age" -> BSONDocument (
+						"$in" -> BSONArray (
+							BSONInteger (21),
+							BSONInteger (22),
+							BSONInteger (23),
+							BSONInteger (24),
+							BSONInteger (25)
+							)
+						)
+					)
+				)
+			);
+	}
+
+	it should "support multi-value inequality" in
+	{
+		BSONDocument.pretty (
+			!criteria[ExampleDocument] (_.nested.description).in (
+				"hello",
+				"world"
+				)
+			) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"nested.description" -> BSONDocument (
+						"$nin" -> BSONArray (
+							BSONString ("hello"),
+							BSONString ("world")
+							)
+						)
+					)
+				)
+			);
+	}
+
 	it should "support conjunctions" in
 	{
 		val q = criteria[ExampleDocument] (_.age) < 90 &&
@@ -285,6 +327,19 @@ class TypedCriteriaSpec
 								)
 							)
 						)
+					)
+				)
+			);
+	}
+
+	it should "support negative existence constraints" in
+	{
+		BSONDocument.pretty (
+			!criteria[ExampleDocument] (_.name).exists
+			) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"name" -> BSONDocument ("$exists" -> BSONBoolean (false))
 					)
 				)
 			);

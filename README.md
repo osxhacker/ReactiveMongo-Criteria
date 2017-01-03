@@ -163,16 +163,18 @@ criteria.aNumber >= 100
 
 ### Existence Operators
 
-* **exists** Matches any document which has the specified field.
+* **exists** Matches any document which has the specified field.  Use the unary not operator to match based on the leaf property being absent entirely.
 
 ```scala
-criteria.aProperty.exists
+criteria.aProperty.exists	// Requires 'aProperty' to be in the document
+!criteria.aProperty.exists	// Only matches documents without 'aProperty'
 ```
 
-* **in** Matches properties which are arrays and have one of the given values.
+* **in** Matches properties which equal one of the given values or array properties having one element which equals any of the given values.  Combine with the unary not operator to specify "not in."
 
 ```scala
-criteria.anArray.in (1, 2, 3, 4, 5)
+criteria.ranking.in (1, 2, 3, 4, 5)
+!criteria.ranking.in (1, 2, 3, 4, 5)
 ```
 
 * **all** Matches array properties which contain all of the given values.

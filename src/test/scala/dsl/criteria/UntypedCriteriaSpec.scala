@@ -83,6 +83,42 @@ class UntypedCriteriaSpec
 			);
 	}
 
+	it should "support multi-value equality" in
+	{
+		BSONDocument.pretty (criteria.ranking.in (1 to 5)) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"ranking" -> BSONDocument (
+						"$in" -> BSONArray (
+							BSONInteger (1),
+							BSONInteger (2),
+							BSONInteger (3),
+							BSONInteger (4),
+							BSONInteger (5)
+							)
+						)
+					)
+				)
+			);
+	}
+
+	it should "support multi-value inequality" in
+	{
+		BSONDocument.pretty (!criteria.ranking.in (0, 1, 2)) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"ranking" -> BSONDocument (
+						"$nin" -> BSONArray (
+							BSONInteger (0),
+							BSONInteger (1),
+							BSONInteger (2)
+							)
+						)
+					)
+				)
+			);
+	}
+
 	it should "support nested object selectors" in
 	{
 		val q = criteria.outer.inner =/= 99;
@@ -374,6 +410,17 @@ class UntypedCriteriaSpec
 		BSONDocument.pretty (criteria.a === 4L || Expression.empty) shouldBe (
 			BSONDocument.pretty (
 				BSONDocument ("a" -> BSONLong (4L))
+				)
+			);
+	}
+
+	it should "support negative existence constraints" in
+	{
+		BSONDocument.pretty (!criteria.a.exists) shouldBe (
+			BSONDocument.pretty (
+				BSONDocument (
+					"a" -> BSONDocument ("$exists" -> BSONBoolean (false))
+					)
 				)
 			);
 	}

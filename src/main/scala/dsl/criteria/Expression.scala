@@ -81,28 +81,31 @@ final case class Expression (name : Option[String], element : BSONElement)
 		this match {
 			case Expression (Some (term),  BSONElement ("$in", vals)) =>
 				Expression (term,  ("$nin", vals));
-				
+
 			case Expression (Some (term),  BSONElement ("$nin", vals)) =>
 				Expression (term,  ("$in", vals));
-				
+
 			case Expression (Some (term),  BSONElement ("$ne", vals)) =>
 				Expression (term,  (term, vals));
-				
+
+			case Expression (Some (term), BSONElement ("$exists", BSONBoolean (value))) =>
+				Expression (Some (term),  ("$exists" -> !value));
+
 			case Expression (Some (term),  BSONElement (field, vals)) if  (field == term) =>
 				Expression (term,  ("$ne", vals));
-				
-			case Expression (None,	BSONElement ("$nor", vals)) =>
+
+			case Expression (None, BSONElement ("$nor", vals)) =>
 				Expression (None,  ("$or" -> vals));
-				
-			case Expression (None,	BSONElement ("$or", vals)) =>
+
+			case Expression (None, BSONElement ("$or", vals)) =>
 				Expression (None,  ("$nor" -> vals));
-				
+
 			case Expression (Some ("$not"), el) =>
 				Expression (None, el);
-				
+
 			case Expression (Some (n), _) =>
-				Expression (Some ("$not"),	(n -> BSONDocument (element)));
-				
+				Expression (Some ("$not"), (n -> BSONDocument (element)));
+
 			case Expression (None, el) =>
 				Expression (Some ("$not"), el);
 		}
@@ -143,9 +146,9 @@ final case class Expression (name : Option[String], element : BSONElement)
 						None,
 						 (op, arr ++ BSONArray (toBSONDocument (rhs)))
 						);
-					
+
 				case BSONElement ("", _) => rhs;
-				
+
 				case _ =>
 					Expression (
 						None,
@@ -187,13 +190,13 @@ object Expression
 		expr match {
 			case Expression (Some (name), BSONElement (field, element)) if (name == field) =>
 				BSONDocument (field -> element);
-				
+
 			case Expression (Some (name), element) =>
 				BSONDocument (name -> BSONDocument (element));
-				
+
 			case Expression (None,  BSONElement ("", _)) =>
                 BSONDocument.empty;
-			
+
 			case Expression (None, element) =>
                 BSONDocument (element);
 			}
