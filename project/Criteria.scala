@@ -84,7 +84,7 @@ object Resolvers
 
 object Dependencies
 {
-	val reactiveMongoVersion = "0.12.0"
+	val reactiveMongoVersion = "0.12.1"
 
 	val bson = "org.reactivemongo" %% "reactivemongo-bson" % reactiveMongoVersion
 
