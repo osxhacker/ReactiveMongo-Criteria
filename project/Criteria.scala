@@ -23,7 +23,7 @@ object BuildSettings
 	val buildSettings = Defaults.defaultSettings ++ Seq(
 		organization := "org.reactivemongo",
 		version := buildVersion,
-		scalaVersion := "2.11.8",
+		scalaVersion := "2.11.11",
 		javaOptions in test ++= Seq("-Xmx512m", "-XX:MaxPermSize=512m"),
 		scalacOptions ++= Seq("-unchecked", "-deprecation"),
 		scalacOptions in (Compile, doc) ++= Seq (
@@ -84,7 +84,7 @@ object Resolvers
 
 object Dependencies
 {
-	val reactiveMongoVersion = "0.12.1"
+	val reactiveMongoVersion = "0.12.5"
 
 	val bson = "org.reactivemongo" %% "reactivemongo-bson" % reactiveMongoVersion
 
