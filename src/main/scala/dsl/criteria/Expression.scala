@@ -153,8 +153,8 @@ final case class Expression (name : Option[String], element : BSONElement)
 					Expression (
 						None,
 						op -> BSONArray (
-							toBSONDocument (this),
-							toBSONDocument (rhs)
+							Producer.valueProducer (toBSONDocument (this)),
+							Producer.valueProducer (toBSONDocument (rhs))
 							)
 						);
 				}

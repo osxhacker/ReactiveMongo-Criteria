@@ -196,7 +196,7 @@ class TypedCriteriaSpec
 		val q = criteria[ExampleDocument] (_.age) < 90 &&
 			criteria[ExampleDocument] (_.nested.score) >= 20.0;
 
-		BSONDocument.pretty (BSONDocument (q.element)) shouldBe (
+		BSONDocument.pretty (BSONDocument (q)) shouldBe (
 			BSONDocument.pretty (
 				BSONDocument (
 					"$and" -> BSONArray (
