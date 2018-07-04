@@ -23,7 +23,8 @@ object BuildSettings
 	val buildSettings = Defaults.defaultSettings ++ Seq(
 		organization := "org.reactivemongo",
 		version := buildVersion,
-		scalaVersion := "2.11.11",
+		scalaVersion := "2.11.12",
+		crossScalaVersions := Seq("2.11.12", "2.12.4"),
 		javaOptions in test ++= Seq("-Xmx512m", "-XX:MaxPermSize=512m"),
 		scalacOptions ++= Seq("-unchecked", "-deprecation"),
 		scalacOptions in (Compile, doc) ++= Seq (
@@ -84,13 +85,13 @@ object Resolvers
 
 object Dependencies
 {
-	val reactiveMongoVersion = "0.12.5"
+	val reactiveMongoVersion = "0.12.7"
 
 	val bson = "org.reactivemongo" %% "reactivemongo-bson" % reactiveMongoVersion
 
 	val bsonmacros = "org.reactivemongo" %% "reactivemongo-bson-macros" % reactiveMongoVersion
 
-    val scalaTest = "org.scalatest" %% "scalatest" % "2.1.5" % "test"
+    val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 }
 
 object ReactiveMongoCriteriaBuild extends Build
